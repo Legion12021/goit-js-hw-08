@@ -1,5 +1,6 @@
+
 const images = [
- {
+  {
     preview:
       'https://cdn.pixabay.com/photo/2019/05/14/16/43/rchids-4202820__480.jpg',
     original:
@@ -64,49 +65,38 @@ const images = [
   },
 ];
 
-const galleryContainer = document.querySelector('.gallery');
+const galleryRef = document.querySelector('.gallery');
 
-
-function createGalleryItem(image) {
+function createGalleryItem({ preview, original, description }) {
   const galleryItem = document.createElement('li');
   galleryItem.classList.add('gallery-item');
 
-  const link = document.createElement('a');
-  link.classList.add('gallery-link');
-  link.href = image.original;
+  const galleryLink = document.createElement('a');
+  galleryLink.classList.add('gallery-link');
+  galleryLink.href = original;
+  galleryLink.addEventListener('click', event => {
+    event.preventDefault();
+    const instance = basicLightbox.create(`
+      <img src="${original}" width="800" height="600">
+    `);
+    instance.show();
 
-  const img = document.createElement('img');
-  img.classList.add('gallery-image');
-  img.src = image.preview;
-  img.setAttribute('data-source', image.original);
-  img.alt = image.description;
+    const modalImg = instance.element().querySelector('img');
+    modalImg.src = original;
+    modalImg.alt = description;
+  });
 
-  link.appendChild(img);
-  galleryItem.appendChild(link);
+  const galleryImage = document.createElement('img');
+  galleryImage.classList.add('gallery-image');
+  galleryImage.src = preview;
+  galleryImage.setAttribute('data-source', original);
+  galleryImage.alt = description;
+
+  galleryLink.appendChild(galleryImage);
+  galleryItem.appendChild(galleryLink);
 
   return galleryItem;
 }
 
-
-images.forEach(image => {
-  const galleryItem = createGalleryItem(image);
-  galleryContainer.appendChild(galleryItem);
-});
-
-
-galleryContainer.addEventListener('click', handleGalleryClick);
-
-function handleGalleryClick(event) {
-  event.preventDefault();
-
-  const target = event.target;
-
-  if (target.nodeName !== 'IMG') return;
-
-  const source = target.dataset.source;
-
-
-  const modal = basicLightbox.create(`
-    <img src="${source}" width="800" height="600">
-`).show();
-}
+const galleryItems = images.map(createGalleryItem);
+galleryRef.append(...galleryItems);
